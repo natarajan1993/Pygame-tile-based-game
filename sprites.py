@@ -4,6 +4,7 @@ from tilemap import collide_hit_rect
 
 vec = pg.math.Vector2
 
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -13,13 +14,12 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
         self.hit_rect.center = self.rect.center
-        self.vel = vec(0,0)
-        self.pos = vec(x,y) * TILESIZE
-        self.rot = 0 # 0 deg is pointing to right
+        self.vel = vec(0, 0)
+        self.pos = vec(x, y) * TILESIZE
+        self.rot = 0  # 0 deg is pointing to right
 
-    
     def get_keys(self):
-        self.vel = vec(0,0)
+        self.vel = vec(0, 0)
         self.rot_speed = 0
         keys = pg.key.get_pressed()
 
@@ -32,42 +32,47 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
 
-        
         # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
         #     self.vel *= 0.7071 # 0.7071 = 1/sqrt(2)
 
-    
     def collide_with_walls(self, dir):
         if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False, collide_hit_rect) #Get all collisions between player and walls
+            # Get all collisions between player and walls
+            hits = pg.sprite.spritecollide(
+                self, self.game.walls, False, collide_hit_rect)
 
             if hits:
-                if self.vel.x > 0: # Sprite is moving right when it collided with wall
+                if self.vel.x > 0:  # Sprite is moving right when it collided with wall
                     self.pos.x = hits[0].rect.left - self.hit_rect.width / 2
-                
-                if self.vel.x < 0: # Sprite is moving left when it collided with wall
+
+                if self.vel.x < 0:  # Sprite is moving left when it collided with wall
                     self.pos.x = hits[0].rect.right + self.hit_rect.width / 2
                 self.vel.x = 0
                 self.hit_rect.centerx = self.pos.x
-        
+
         if dir == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False, collide_hit_rect)
+            hits = pg.sprite.spritecollide(
+                self, self.game.walls, False, collide_hit_rect)
 
             if hits:
-                if self.vel.y > 0: # Sprite is moving down when it collided with wall
-                    self.pos.y = hits[0].rect.top - self.hit_rect.height / 2 # This will allow the player to slide on the other direction
+                if self.vel.y > 0:  # Sprite is moving down when it collided with wall
+                    # This will allow the player to slide on the other direction
+                    self.pos.y = hits[0].rect.top - self.hit_rect.height / 2
                     # if he was moving in X plane, slide in y plane and vice-versa
-                
-                if self.vel.y < 0: # Sprite is moving up when it collided with wall
-                    self.pos.y = hits[0].rect.bottom + self.hit_rect.height / 2 # Divide by 2 because the player sprite is calculated at the center of the image
+
+                if self.vel.y < 0:  # Sprite is moving up when it collided with wall
+                    # Divide by 2 because the player sprite is calculated at the center of the image
+                    self.pos.y = hits[0].rect.bottom + self.hit_rect.height / 2
                 self.vel.y = 0
                 self.hit_rect.centery = self.pos.y
 
     def update(self):
         self.get_keys()
         self.pos += self.vel * self.game.dt
-        self.rot = (self.rot + self.rot_speed * self.game.dt) % 360 # % 360 keeps rotation between 0 and 360 deg
-        self.image = pg.transform.rotate(self.game.player_img, self.rot)
+        # % 360 keeps rotation between 0 and 360 deg
+        self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
+        self.image = pg.transform.rotate(
+            self.game.player_img, self.rot)  # Rotate the player sprite
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
@@ -79,15 +84,33 @@ class Player(pg.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
+
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(GREEN)
+        self.image = self.game.wall_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+
+class Mob(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.mob_img
+        self.rect = self.image.get_rect()
+        self.pos = vec(x, y) * TILESIZE
+        self.rect.center = self.pos
+        self.rot = 0
+
+    def update(self):
+        self.rot = (self.game.player.pos - self.pos).angle_to(vec(1,0)) # Make zombie point to player with vector subtraction
+        self.image = pg.transform.rotate(self.game.mob_img, self.rot)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
