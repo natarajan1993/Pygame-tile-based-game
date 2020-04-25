@@ -1,13 +1,15 @@
 import pygame as pg
 from settings import *
 
+
+
 class Map:
     def __init__(self, filename):
         """Load map data from a text file and append it to the map data text file"""
         self.data = []
         with open(filename, 'rt') as f:
             for line in f:
-                self.data.append(line.strip())
+                self.data.append(line.strip()) # Removes \n at the end of the line
 
         self.tilewidth = len(self.data[0])
         self.tileheight = len(self.data)
