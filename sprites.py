@@ -33,7 +33,7 @@ class Player(pg.sprite.Sprite):
     
     def collide_with_walls(self, dir):
         if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            hits = pg.sprite.spritecollide(self, self.game.walls, False) #Get all collisions between player and walls
 
             if hits:
                 if self.vx > 0: # Sprite is moving right when it collided with wall
@@ -59,7 +59,7 @@ class Player(pg.sprite.Sprite):
 
     def update(self):
         self.get_keys()
-        self.x += self.vx * self.game.dt
+        self.x += self.vx * self.game.dt # Smooth movement timed with clock speed
         self.y += self.vy * self.game.dt
         
         self.rect.x = self.x
