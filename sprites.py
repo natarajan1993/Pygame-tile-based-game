@@ -1,4 +1,5 @@
 import pygame as pg
+from random import uniform
 from settings import *
 from tilemap import collide_hit_rect
 
@@ -33,6 +34,28 @@ def collide_with_walls(sprite, group, dir):
             sprite.vel.y = 0
             sprite.hit_rect.centery = sprite.pos.y
 
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, pos, direction):
+        self.groups = game.all_sprites, game.bullets
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.bullet_img
+        self.rect = self.image.get_rect()
+        self.pos = vec( pos )
+        self.rect.center = self.pos
+        spread = uniform(-GUN_SPREAD, GUN_SPREAD)
+        self.vel = direction.rotate(spread) * BULLET_SPEED
+        self.spawn_time = pg.time.get_ticks()
+
+    def update(self):
+        self.pos += self.vel * self.game.dt
+        self.rect.center = self.pos
+        if pg.sprite.spritecollideany(self, self.game.walls):
+            self.kill()
+        if pg.time.get_ticks() - self.spawn_time > BULLET_LIFETIME:
+            self.kill()
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -45,6 +68,7 @@ class Player(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.pos = vec(x, y) * TILESIZE
         self.rot = 0  # 0 deg is pointing to right
+        self.last_shot = 0
 
     def get_keys(self):
         self.vel = vec(0, 0)
@@ -59,6 +83,14 @@ class Player(pg.sprite.Sprite):
             self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+        if keys[pg.K_SPACE]:
+            now = pg.time.get_ticks()
+            if now - self.last_shot > BULLET_RATE:
+                self.last_shot = now
+                direction = vec(1,0).rotate(-self.rot)
+                pos = self.pos + BARREL_OFFSET.rotate(-self.rot)
+                Bullet(self.game, pos, direction)
+                self.vel = vec(-KICKBACK, 0).rotate(-self.rot)
 
         # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
         #     self.vel *= 0.7071 # 0.7071 = 1/sqrt(2)

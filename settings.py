@@ -1,5 +1,7 @@
 import pygame as pg
 
+vec = pg.math.Vector2
+
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -23,6 +25,14 @@ GRIDHEIGHT = HEIGHT / TILESIZE
 
 WALL_IMG = 'element_green_square.png'
 
+# Gun settings
+BULLET_IMG = 'bullet.png'
+BULLET_SPEED = 500
+BULLET_LIFETIME = 1000
+BULLET_RATE = 150
+BARREL_OFFSET = vec(30,10)
+KICKBACK = 200
+GUN_SPREAD = 5
 # Player settings
 PLAYER_SPEED = 500
 PLAYER_ROT_SPEED = 250 #degrees/sec
