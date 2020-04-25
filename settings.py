@@ -1,3 +1,5 @@
+import pygame as pg
+
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -20,4 +22,6 @@ GRIDHEIGHT = HEIGHT / TILESIZE
 
 # Player settings
 PLAYER_SPEED = 300
+PLAYER_ROT_SPEED = 250 #degrees/sec
 PLAYER_IMAGE = 'manBlue_gun.png'
+PLAYER_HIT_RECT = pg.Rect(0,0,35,35)
