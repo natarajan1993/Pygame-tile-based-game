@@ -160,7 +160,7 @@ class Mob(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = game.mob_img
+        self.image = game.mob_img.copy()
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
         self.hit_rect = MOB_HIT_RECT.copy()
@@ -173,6 +173,7 @@ class Mob(pg.sprite.Sprite):
         self.rot = 0
         self.health = MOB_HEALTH
         self.speed = choice(MOB_SPEEDS)
+        self.target = game.player
 
     def avoid_mobs(self):
         for mob in self.game.mobs:
@@ -183,24 +184,26 @@ class Mob(pg.sprite.Sprite):
 
 
     def update(self):
-        self.rot = (self.game.player.pos - self.pos).angle_to(vec(1,0)) # Make zombie point to player with vector subtraction
-        self.image = pg.transform.rotate(self.game.mob_img, self.rot)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        self.acc = vec(1, 0).rotate(-self.rot)
-        self.avoid_mobs()
-        self.acc.scale_to_length(self.speed)
-        self.acc += self.vel * -1
-        self.vel += self.acc * self.game.dt
-        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2 # v = ut + 1/2 at^2
+        target_dist = self.target.pos - self.pos
+        if target_dist.length_squared() < DETECT_RADIUS**2:
+            self.rot = target_dist.angle_to(vec(1,0)) # Make zombie point to player with vector subtraction
+            self.image = pg.transform.rotate(self.game.mob_img, self.rot)
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(1, 0).rotate(-self.rot)
+            self.avoid_mobs()
+            self.acc.scale_to_length(self.speed)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2 # v = ut + 1/2 at^2
 
-        self.hit_rect.centerx = self.pos.x
-        collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
 
-        self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.walls, 'y')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
 
-        self.rect.center = self.hit_rect.center
+            self.rect.center = self.hit_rect.center
 
         if self.health <= 0:
             self.kill()
