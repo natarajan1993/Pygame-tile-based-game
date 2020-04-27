@@ -28,7 +28,7 @@ WALL_IMG = 'element_green_square.png'
 
 # Gun settings
 BULLET_IMG = 'bullet.png'
-BULLET_SPEED = 500
+BULLET_SPEED = 900
 BULLET_LIFETIME = 1000
 BULLET_RATE = 150
 BARREL_OFFSET = vec(30,10)
@@ -45,8 +45,9 @@ PLAYER_HEALTH = 500
 
 # Mob Settings
 MOB_IMG = 'zombie1_hold.png'
-MOB_SPEED = 250
+MOB_SPEEDS = [ 250 , 150, 200, 75, 100]
 MOB_HIT_RECT = pg.Rect(0,0,30,30)
 MOB_HEALTH = 100
 MOB_DAMAGE = 5
 MOB_KNOCKBACK = 20
+AVOID_RADIUS = 50 # pixels
