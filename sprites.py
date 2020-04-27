@@ -122,6 +122,11 @@ class Player(pg.sprite.Sprite):
 
         self.rect.center = self.hit_rect.center
 
+    def add_health(self, amount):
+        self.health += amount
+        if self.health > PLAYER_HEALTH:
+            self.health = PLAYER_HEALTH
+
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -230,3 +235,15 @@ class MuzzleFlash(pg.sprite.Sprite):
     def update(self):
         if pg.time.get_ticks() - self.spawn_time > FLASH_DURATION:
             self.kill()
+
+
+class Item(pg.sprite.Sprite):
+    def __init__(self, game, pos, item_type):
+        self._layer = ITEMS_LAYER
+        self.groups = game.all_sprites, game.items
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = game.item_images[item_type] 
+        self.rect = self.image.get_rect()
+        self.item_type = item_type
+        self.rect.center = pos 
