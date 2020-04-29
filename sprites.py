@@ -1,6 +1,6 @@
 import pygame as pg
 import pytweening as tween
-from random import uniform, choice, randint
+from random import uniform, choice, randint, random
 from settings import *
 from tilemap import collide_hit_rect
 
@@ -98,6 +98,7 @@ class Player(pg.sprite.Sprite):
                 Bullet(self.game, pos, direction)
                 self.vel = vec(-KICKBACK, 0).rotate(-self.rot)
 
+                choice(self.game.weapon_sounds['gun']).play()
                 MuzzleFlash(self.game, pos)
 
         # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
@@ -186,6 +187,8 @@ class Mob(pg.sprite.Sprite):
     def update(self):
         target_dist = self.target.pos - self.pos
         if target_dist.length_squared() < DETECT_RADIUS**2:
+            if random() < 0.002: # Make the zombies moan randomly
+                choice(self.game.zombie_moan_sounds).play()
             self.rot = target_dist.angle_to(vec(1,0)) # Make zombie point to player with vector subtraction
             self.image = pg.transform.rotate(self.game.mob_img, self.rot)
             self.rect = self.image.get_rect()
@@ -206,6 +209,7 @@ class Mob(pg.sprite.Sprite):
             self.rect.center = self.hit_rect.center
 
         if self.health <= 0:
+            choice(self.game.zombie_hit_sounds).play()
             self.kill()
 
     def draw_health(self):
