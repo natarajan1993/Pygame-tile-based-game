@@ -55,7 +55,7 @@ DETECT_RADIUS = 400
 # Effects
 MUZZLE_FLASHES = ["whitePuff15.png", "whitePuff16.png","whitePuff17.png","whitePuff18.png"]
 FLASH_DURATION = 40
-
+SPLAT = 'splat green.png'
 
 # Layers
 WALL_LAYER = 1
@@ -78,5 +78,5 @@ PLAYER_HIT_SOUNDS = ['pain/8.wav','pain/9.wav','pain/10.wav','pain/11.wav']
 ZOMBIE_MOAN_SOUNDS = ['brains2.wav','brains3.wav','zombie-roar-1.wav','zombie-roar-2.wav','zombie-roar-3.wav','zombie-roar-5.wav','zombie-roar-6.wav',
                         'zombie-roar-6.wav','zombie-roar-7.wav']
 ZOMBIE_HIT_SOUNDS = ['splat-15.wav']
-WEAPON_SOUNDS_GUN = ['sfx_weapon_singleshot2.wav']
+WEAPON_SOUNDS_GUN = ['pistol.wav']
 EFFECTS_SOUNDS = {'level_start':'level_start.wav', 'health_up':'health_pack.wav'}

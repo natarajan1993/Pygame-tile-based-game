@@ -98,7 +98,9 @@ class Player(pg.sprite.Sprite):
                 Bullet(self.game, pos, direction)
                 self.vel = vec(-KICKBACK, 0).rotate(-self.rot)
 
-                choice(self.game.weapon_sounds['gun']).play()
+                s = pg.mixer.Sound(choice(self.game.weapon_sounds['gun']))
+                s.set_volume(0.2)
+                s.play()
                 MuzzleFlash(self.game, pos)
 
         # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
@@ -211,6 +213,7 @@ class Mob(pg.sprite.Sprite):
         if self.health <= 0:
             choice(self.game.zombie_hit_sounds).play()
             self.kill()
+            self.game.map_img.blit(self.game.splat, self.pos - vec(32,32))
 
     def draw_health(self):
         if self.health > 60:
