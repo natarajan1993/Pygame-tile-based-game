@@ -78,7 +78,9 @@ MUZZLE_FLASHES = ["whitePuff15.png", "whitePuff16.png","whitePuff17.png","whiteP
 FLASH_DURATION = 40
 SPLAT = 'splat green.png'
 DAMAGE_ALPHA = [i for i in range(0,255,25)]
-
+NIGHT_COLOR = (20,20,20)
+LIGHT_RADIUS = (500,500)
+LIGHT_MASK = "light_350_med.png"
 # Layers
 WALL_LAYER = 1
 PLAYER_LAYER = 2
