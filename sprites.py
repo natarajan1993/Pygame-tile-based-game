@@ -3,6 +3,7 @@ import pytweening as tween
 from random import uniform, choice, randint, random
 from settings import *
 from tilemap import collide_hit_rect
+from itertools import chain
 
 vec = pg.math.Vector2
 
@@ -48,7 +49,7 @@ class Bullet(pg.sprite.Sprite):
         self.pos = vec( pos )
         self.rect.center = self.pos
         # spread = uniform(-GUN_SPREAD, GUN_SPREAD)
-        self.vel = direction * WEAPONS[game.player.weapon]['bullet_speed']
+        self.vel = direction * WEAPONS[game.player.weapon]['bullet_speed'] * uniform(0.9,1.1)
         self.spawn_time = pg.time.get_ticks()
 
     def update(self):
@@ -74,8 +75,9 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(x, y) 
         self.rot = 0  # 0 deg is pointing to right
         self.last_shot = 0
-        self.weapon = 'shotgun'
+        self.weapon = 'pistol'
         self.health = PLAYER_HEALTH
+        self.damaged = False
 
     def get_keys(self):
         self.vel = vec(0, 0)
@@ -116,13 +118,24 @@ class Player(pg.sprite.Sprite):
 
     
 
+    def hit(self):
+        self.damaged = True
+        self.damage_alpha = chain(DAMAGE_ALPHA * 2)
+        
+
     def update(self):
         self.get_keys()
         self.pos += self.vel * self.game.dt
         # % 360 keeps rotation between 0 and 360 deg
         self.rot = (self.rot + self.rot_speed * self.game.dt) % 360
-        self.image = pg.transform.rotate(
-            self.game.player_img, self.rot)  # Rotate the player sprite
+        self.image = pg.transform.rotate(self.game.player_img, self.rot)  # Rotate the player sprite
+        if self.damaged:
+            # Pulse the player image if he gets damaged
+            try:
+                self.image.fill((255,0,0,next(self.damage_alpha)),special_flags = pg.BLEND_RGBA_MULT)
+            except:
+                self.damaged = False
+            
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
