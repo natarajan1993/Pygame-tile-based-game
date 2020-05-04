@@ -42,13 +42,13 @@ class Bullet(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.bullets
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = game.bullet_img
+        self.image = game.bullet_images[WEAPONS[game.player.weapon]['bullet_size']]
         self.rect = self.image.get_rect()
         self.hit_rect = self.rect
         self.pos = vec( pos )
         self.rect.center = self.pos
-        spread = uniform(-GUN_SPREAD, GUN_SPREAD)
-        self.vel = direction.rotate(spread) * BULLET_SPEED
+        # spread = uniform(-GUN_SPREAD, GUN_SPREAD)
+        self.vel = direction * WEAPONS[game.player.weapon]['bullet_speed']
         self.spawn_time = pg.time.get_ticks()
 
     def update(self):
@@ -56,7 +56,7 @@ class Bullet(pg.sprite.Sprite):
         self.rect.center = self.pos
         if pg.sprite.spritecollideany(self, self.game.walls):
             self.kill()
-        if pg.time.get_ticks() - self.spawn_time > BULLET_LIFETIME:
+        if pg.time.get_ticks() - self.spawn_time > WEAPONS[self.game.player.weapon]['bullet_lifetime']:
             self.kill()
 
 class Player(pg.sprite.Sprite):
@@ -74,6 +74,7 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(x, y) 
         self.rot = 0  # 0 deg is pointing to right
         self.last_shot = 0
+        self.weapon = 'shotgun'
         self.health = PLAYER_HEALTH
 
     def get_keys(self):
@@ -90,21 +91,28 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
         if keys[pg.K_SPACE]:
-            now = pg.time.get_ticks()
-            if now - self.last_shot > BULLET_RATE:
-                self.last_shot = now
-                direction = vec(1,0).rotate(-self.rot)
-                pos = self.pos + BARREL_OFFSET.rotate(-self.rot)
-                Bullet(self.game, pos, direction)
-                self.vel = vec(-KICKBACK, 0).rotate(-self.rot)
+            self.shoot()
 
-                s = pg.mixer.Sound(choice(self.game.weapon_sounds['gun']))
+
+    def shoot(self):
+        now = pg.time.get_ticks()
+        if now - self.last_shot > WEAPONS[self.weapon]['rate']:
+            self.last_shot = now
+            direction = vec(1,0).rotate(-self.rot)
+            pos = self.pos + BARREL_OFFSET.rotate(-self.rot)
+            self.vel = vec(-WEAPONS[self.weapon]['kickback'], 0).rotate(-self.rot)
+            for i in range(WEAPONS[self.weapon]['bullet_count']):
+                spread = uniform(-WEAPONS[self.weapon]['spread'],WEAPONS[self.weapon]['spread'])
+                Bullet(self.game, pos, direction.rotate(spread))
+                s = choice(self.game.weapon_sounds[self.weapon])
                 s.set_volume(0.2)
+                if s.get_num_channels() > 2:
+                    s.stop()
                 s.play()
-                MuzzleFlash(self.game, pos)
+            MuzzleFlash(self.game, pos)
 
-        # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
-        #     self.vel *= 0.7071 # 0.7071 = 1/sqrt(2)
+    # if self.vel.x != 0 and self.vel.y != 0: # To make sure the diagonal doesn't move faster
+    #     self.vel *= 0.7071 # 0.7071 = 1/sqrt(2)
 
     
 
