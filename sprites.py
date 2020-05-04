@@ -38,7 +38,7 @@ def collide_with_walls(sprite, group, dir):
 
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self, game, pos, direction):
+    def __init__(self, game, pos, direction, damage):
         self._layer = BULLET_LAYER
         self.groups = game.all_sprites, game.bullets
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -51,6 +51,7 @@ class Bullet(pg.sprite.Sprite):
         # spread = uniform(-GUN_SPREAD, GUN_SPREAD)
         self.vel = direction * WEAPONS[game.player.weapon]['bullet_speed'] * uniform(0.9,1.1)
         self.spawn_time = pg.time.get_ticks()
+        self.damage = damage
 
     def update(self):
         self.pos += self.vel * self.game.dt
@@ -105,7 +106,7 @@ class Player(pg.sprite.Sprite):
             self.vel = vec(-WEAPONS[self.weapon]['kickback'], 0).rotate(-self.rot)
             for i in range(WEAPONS[self.weapon]['bullet_count']):
                 spread = uniform(-WEAPONS[self.weapon]['spread'],WEAPONS[self.weapon]['spread'])
-                Bullet(self.game, pos, direction.rotate(spread))
+                Bullet(self.game, pos, direction.rotate(spread), WEAPONS[self.weapon]['damage'])
                 s = choice(self.game.weapon_sounds[self.weapon])
                 s.set_volume(0.2)
                 if s.get_num_channels() > 2:

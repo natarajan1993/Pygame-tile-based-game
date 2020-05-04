@@ -65,16 +65,14 @@ class Game:
     def load_data(self):
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, 'img')
-        map_folder = path.join(game_folder, 'maps')
         snd_folder = path.join(game_folder, 'snd')
         music_folder = path.join(game_folder, 'music')
 
+        self.map_folder = path.join(game_folder, 'maps')
         self.title_font = path.join(img_folder, 'ZOMBIE.TTF')
+        self.hud_font = path.join(img_folder, 'Impacted2.0.ttf')
         self.dim_screen = pg.Surface(self.screen.get_size()).convert_alpha()
         self.dim_screen.fill((0,0,0,180)) # Fill screen black but semi transparent
-        self.map = TiledMap(path.join(map_folder, 'level1.tmx'))
-        self.map_img = self.map.make_map()
-        self.map_rect = self.map_img.get_rect()
         self.player_img = pg.image.load(path.join(img_folder, PLAYER_IMAGE)).convert_alpha()
         self.mob_img = pg.image.load(path.join(img_folder, MOB_IMG)).convert_alpha()
 
@@ -134,6 +132,9 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        self.map = TiledMap(path.join(self.map_folder, 'level1.tmx'))
+        self.map_img = self.map.make_map()
+        self.map_rect = self.map_img.get_rect()
 
         # for row, tiles in enumerate(self.map.data):
             # for col,tile in enumerate(tiles):
@@ -179,6 +180,8 @@ class Game:
         # update portion of the game loop
         self.all_sprites.update()
         self.camera.update(self.player)
+        if len(self.mobs) == 0:
+            self.playing = False
         # Player hits health items
         hits = pg.sprite.spritecollide(self.player, self.items, False)
         for hit in hits:
@@ -207,9 +210,11 @@ class Game:
             self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
         # Bullets hit mobs
         hits = pg.sprite.groupcollide(self.mobs, self.bullets, False, True)
-        for hit in hits:
-            hit.health -= WEAPONS[self.player.weapon]['damage'] * len(hits[hit])
-            hit.vel = vec(0,0)
+        for mob in hits:
+            # mob.health -= WEAPONS[self.player.weapon]['damage'] * len(hits[mob])
+            for bullet in hits[mob]:
+                mob.health -= bullet.damage
+            mob.vel = vec(0,0)
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
@@ -234,6 +239,7 @@ class Game:
                 
         # HUD
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
+        self.draw_text('Zombies: {}'.format(len(self.mobs)), self.hud_font, 30, WHITE, WIDTH - 10, 10, align="ne")
         if self.paused:
             self.screen.blit(self.dim_screen, (0,0))
             self.draw_text("PAUSED", self.title_font, 105, RED, WIDTH/2, HEIGHT/2, align="center")
@@ -258,8 +264,23 @@ class Game:
         pass
 
     def show_go_screen(self):
-        pass
+        self.screen.fill(BLACK)
+        self.draw_text("GAME OVER", self.title_font, 100, RED, WIDTH/2, HEIGHT/2, align="center")
+        self.draw_text("Press a key to start", self.title_font, 75, WHITE, WIDTH/2, HEIGHT * 3/4, align="center")
+        pg.display.flip()
+        self.wait_for_key()
 
+    def wait_for_key(self):
+        pg.event.wait()
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
 # create the game object
 g = Game()
 g.show_start_screen()

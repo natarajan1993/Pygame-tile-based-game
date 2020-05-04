@@ -62,7 +62,7 @@ PLAYER_SPEED = 500
 PLAYER_ROT_SPEED = 250 #degrees/sec
 PLAYER_IMAGE = 'manBlue_gun.png'
 PLAYER_HIT_RECT = pg.Rect(0,0,35,35)
-PLAYER_HEALTH = 500
+PLAYER_HEALTH = 100
 
 # Mob Settings
 MOB_IMG = 'zombie1_hold.png'
